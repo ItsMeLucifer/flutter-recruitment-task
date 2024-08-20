@@ -65,14 +65,17 @@ class _ProductsSliverList extends StatelessWidget {
 
     return SliverList.separated(
       itemCount: products.length,
-      itemBuilder: (context, index) => _ProductCard(products[index]),
+      itemBuilder: (context, index) => _ProductCard(
+        products[index],
+        key: Key('product_$index'),
+      ),
       separatorBuilder: (context, index) => const Divider(),
     );
   }
 }
 
 class _ProductCard extends StatelessWidget {
-  const _ProductCard(this.product);
+  const _ProductCard(this.product, {super.key});
 
   final Product product;
 
@@ -91,9 +94,7 @@ class _ProductCard extends StatelessWidget {
 }
 
 class _Tags extends StatelessWidget {
-  const _Tags({
-    required this.product,
-  });
+  const _Tags({required this.product});
 
   final Product product;
 
@@ -105,21 +106,33 @@ class _Tags extends StatelessWidget {
   }
 }
 
-class _TagWidget extends StatelessWidget {
+class _TagWidget extends StatefulWidget {
   const _TagWidget(this.tag);
 
   final Tag tag;
 
   @override
-  Widget build(BuildContext context) {
-    const possibleColors = Colors.primaries;
-    final color = possibleColors[Random().nextInt(possibleColors.length)];
+  State<_TagWidget> createState() => _TagWidgetState();
+}
 
+class _TagWidgetState extends State<_TagWidget> {
+  List<MaterialColor> get possibleColors => Colors.primaries;
+
+  late final Color color;
+
+  @override
+  void initState() {
+    color = possibleColors[Random().nextInt(possibleColors.length)];
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Chip(
         color: MaterialStateProperty.all(color),
-        label: Text(tag.label),
+        label: Text(widget.tag.label),
       ),
     );
   }
