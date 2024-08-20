@@ -45,3 +45,10 @@ app.*.map.json
 
 # FVM
 .fvm/flutter_sdk
+
+# IDE settings
+.vscode/settings.json
+
+# Generated
+*.freezed.dart
+*.g.dart
