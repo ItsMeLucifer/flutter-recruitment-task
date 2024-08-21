@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:flutter_recruitment_task/repositories/products_repository.dart';
 
 part 'products_page.g.dart';
 
@@ -35,10 +36,21 @@ class Product {
     required this.offer,
   });
 
-  factory Product.fromJson(Map<String, dynamic> json) =>
-      _$ProductFromJson(json);
+  /// Integers work better as an ID field (space saving and performance reasons).
+  /// Since the id field is actually an integer converted to String,
+  /// I decided to modify the parsing from json.
+  /// (The best solution would be to change the hierarchy of the project,
+  /// adding entities, so that we would separate what is fetched from
+  /// the server (or file) from what we are working on in the application -
+  /// in this case the model could have an id field of String type, and
+  /// the entity an id field of integer type. However, I decided not to do this,
+  /// as it would affect the [ProductsRepository] file, the modification of which has been prohibited)
+  factory Product.fromJson(Map<String, dynamic> json) {
+    json['id'] = int.parse(json['id']);
+    return _$ProductFromJson(json);
+  }
 
-  final String id;
+  final int id;
   final String name;
   final String mainImage;
   final String description;

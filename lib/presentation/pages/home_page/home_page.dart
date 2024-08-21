@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_recruitment_task/models/products_page.dart';
@@ -9,7 +10,14 @@ import 'package:flutter_recruitment_task/presentation/widgets/big_text.dart';
 const _mainPadding = EdgeInsets.all(16.0);
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  /// The ID of the product to be scrolled, if not found on the current products
+  /// page, the widget will try to download the next page.
+  final int? highlighedProductId;
+
+  const HomePage({
+    this.highlighedProductId,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +32,10 @@ class HomePage extends StatelessWidget {
             return switch (state) {
               Error() => BigText('Error: ${state.error}'),
               Loading() => const BigText('Loading...'),
-              Loaded() => _LoadedWidget(state: state),
+              Loaded() => _LoadedWidget(
+                  state: state,
+                  highlightedProductId: highlighedProductId,
+                ),
             };
           },
         ),
@@ -33,61 +44,120 @@ class HomePage extends StatelessWidget {
   }
 }
 
-class _LoadedWidget extends StatelessWidget {
+class _LoadedWidget extends StatefulWidget {
+  final Loaded state;
+  final int? highlightedProductId;
+
   const _LoadedWidget({
+    this.highlightedProductId,
     required this.state,
   });
 
-  final Loaded state;
+  @override
+  State<_LoadedWidget> createState() => _LoadedWidgetState();
+}
+
+class _LoadedWidgetState extends State<_LoadedWidget> {
+  late final ScrollController controller;
+
+  late final List<Product> products;
+
+  @override
+  void initState() {
+    controller = ScrollController();
+    products = widget.state.pages
+        .map((page) => page.products)
+        .expand((product) => product)
+        .toList();
+    if (widget.highlightedProductId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _highlightProduct());
+    }
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
+      controller: controller,
       slivers: [
-        _ProductsSliverList(state: state),
+        _ProductsSliverList(products: products),
         const _GetNextPageButton(),
       ],
     );
   }
+
+  void _highlightProduct() {
+    final product =
+        products.firstWhereOrNull((p) => p.id == widget.highlightedProductId!);
+    if (product == null) {
+      // Next page
+      return;
+    }
+    final productIndex = products.indexOf(product);
+    final offset = _calculateOffset(productIndex);
+    const Duration animationDuration = Duration(seconds: 1);
+
+    controller.animateTo(
+      offset,
+      duration: animationDuration,
+      curve: Curves.easeIn,
+    );
+  }
+
+  double _calculateOffset(int itemIndex) {
+    return itemIndex *
+        (_ProductCard.height + _ProductsSliverList.dividerHeight);
+  }
 }
 
 class _ProductsSliverList extends StatelessWidget {
-  const _ProductsSliverList({required this.state});
+  final List<Product> products;
+  const _ProductsSliverList({required this.products});
 
-  final Loaded state;
+  static const double dividerHeight = 16;
 
   @override
   Widget build(BuildContext context) {
-    final products = state.pages
-        .map((page) => page.products)
-        .expand((product) => product)
-        .toList();
-
     return SliverList.separated(
       itemCount: products.length,
       itemBuilder: (context, index) => _ProductCard(
         products[index],
         key: Key('product_$index'),
       ),
-      separatorBuilder: (context, index) => const Divider(),
+      separatorBuilder: (context, index) =>
+          const Divider(height: dividerHeight),
     );
   }
 }
 
 class _ProductCard extends StatelessWidget {
-  const _ProductCard(this.product, {super.key});
+  const _ProductCard(
+    this.product, {
+    super.key,
+  });
 
   final Product product;
 
+  static const double height = 150;
+
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          BigText(product.name),
-          _Tags(product: product),
-        ],
+    return SizedBox(
+      height: height,
+      child: Card(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            BigText(product.name),
+            Expanded(child: _Tags(product: product)),
+          ],
+        ),
       ),
     );
   }
@@ -100,7 +170,8 @@ class _Tags extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
+    return ListView(
+      scrollDirection: Axis.horizontal,
       children: product.tags.map(_TagWidget.new).toList(),
     );
   }

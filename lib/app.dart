@@ -19,7 +19,9 @@ class App extends StatelessWidget {
         create: (context) {
           return HomeCubit(productsRepository)..getNextPage();
         },
-        child: const HomePage(),
+        child: const HomePage(
+          highlighedProductId: 912,
+        ),
       ),
     );
   }
