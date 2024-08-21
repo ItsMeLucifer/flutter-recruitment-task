@@ -3,6 +3,7 @@ import 'package:flutter_recruitment_task/models/get_products_page.dart';
 import 'package:flutter_recruitment_task/models/products_page.dart';
 import 'package:flutter_recruitment_task/repositories/products_repository.dart';
 
+/// States
 sealed class HomeState {
   const HomeState();
 }
@@ -12,9 +13,13 @@ class Loading extends HomeState {
 }
 
 class Loaded extends HomeState {
-  const Loaded({required this.pages});
+  const Loaded({
+    required this.pages,
+    this.filters = const <Filter>[],
+  });
 
   final List<ProductsPage> pages;
+  final List<Filter> filters;
 }
 
 class Error extends HomeState {
@@ -22,6 +27,8 @@ class Error extends HomeState {
 
   final dynamic error;
 }
+
+/// Cubit
 
 class HomeCubit extends Cubit<HomeState> {
   HomeCubit(this._productsRepository) : super(const Loading());
@@ -52,4 +59,31 @@ class HomeCubit extends Cubit<HomeState> {
       emit(Error(error: e));
     }
   }
+}
+
+/// Filters
+
+sealed class Filter {
+  const Filter();
+}
+
+class TagFilter extends Filter {
+  const TagFilter({required this.tags});
+
+  final List<Tag> tags;
+}
+
+class FavoriteFilter extends Filter {
+  const FavoriteFilter();
+}
+
+class PriceFilter extends Filter {
+  const PriceFilter({
+    this.min,
+    this.max,
+  }) : assert(min != null || max != null,
+            'At least one of the values ([min] or [max]) must be provided.');
+
+  final double? min;
+  final double? max;
 }
