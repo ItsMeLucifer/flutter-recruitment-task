@@ -87,7 +87,8 @@ class _LoadedWidgetState extends State<_LoadedWidget> {
       controller: controller,
       slivers: [
         _ProductsSliverList(products: products),
-        const _GetNextPageButton(),
+        if (context.read<HomeCubit>().canFetchMorePages)
+          const _GetNextPageButton(),
       ],
     );
   }
@@ -96,7 +97,7 @@ class _LoadedWidgetState extends State<_LoadedWidget> {
     final product =
         products.firstWhereOrNull((p) => p.id == widget.highlightedProductId!);
     if (product == null) {
-      // Next page
+      context.read<HomeCubit>().getNextPage();
       return;
     }
     final productIndex = products.indexOf(product);
@@ -106,7 +107,7 @@ class _LoadedWidgetState extends State<_LoadedWidget> {
     controller.animateTo(
       offset,
       duration: animationDuration,
-      curve: Curves.easeIn,
+      curve: Curves.easeInOut,
     );
   }
 

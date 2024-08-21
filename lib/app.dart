@@ -20,7 +20,7 @@ class App extends StatelessWidget {
           return HomeCubit(productsRepository)..getNextPage();
         },
         child: const HomePage(
-          highlighedProductId: 912,
+          highlighedProductId: 63,
         ),
       ),
     );
