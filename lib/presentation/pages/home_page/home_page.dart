@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_recruitment_task/models/products_page.dart';
 import 'package:flutter_recruitment_task/presentation/pages/home_page/home_cubit.dart';
 import 'package:flutter_recruitment_task/presentation/widgets/big_text.dart';
+import 'package:flutter_recruitment_task/presentation/widgets/filters_bar.dart';
 
 const _mainPadding = EdgeInsets.all(16.0);
 
@@ -69,11 +70,17 @@ class _LoadedWidgetState extends State<_LoadedWidget> {
         .map((page) => page.products)
         .expand((product) => product)
         .toList();
+    // Scroll to highlighted product
     if (widget.highlightedProductId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _highlightProduct());
     }
     super.initState();
   }
+
+  List<Product> get filteredProducts => products.where((product) {
+        return widget.state.filters.isEmpty ||
+            widget.state.filters.any((filter) => filter.accepts(product));
+      }).toList();
 
   @override
   void dispose() {
@@ -83,12 +90,20 @@ class _LoadedWidgetState extends State<_LoadedWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      controller: controller,
-      slivers: [
-        _ProductsSliverList(products: products),
-        if (context.read<HomeCubit>().canFetchMorePages)
-          const _GetNextPageButton(),
+    return Column(
+      children: [
+        FiltersBar(state: widget.state),
+        Expanded(
+          child: CustomScrollView(
+            controller: controller,
+            shrinkWrap: true,
+            slivers: [
+              _ProductsSliverList(products: filteredProducts),
+              if (context.read<HomeCubit>().canFetchMorePages)
+                const _GetNextPageButton(),
+            ],
+          ),
+        ),
       ],
     );
   }

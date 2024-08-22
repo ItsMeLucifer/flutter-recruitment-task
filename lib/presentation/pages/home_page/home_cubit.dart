@@ -59,22 +59,44 @@ class HomeCubit extends Cubit<HomeState> {
       emit(Error(error: e));
     }
   }
+
+  void setProductFilters({
+    required List<Filter> filters,
+  }) {
+    emit(Loaded(pages: _pages, filters: filters));
+  }
+
+  void clearProductFilters() {
+    emit(Loaded(pages: _pages, filters: []));
+  }
 }
 
 /// Filters
 
 sealed class Filter {
   const Filter();
+
+  bool accepts(Product product);
 }
 
 class TagFilter extends Filter {
   const TagFilter({required this.tags});
 
   final List<Tag> tags;
+
+  @override
+  bool accepts(Product product) {
+    return product.tags.any((tag) => tags.contains(tag));
+  }
 }
 
 class FavoriteFilter extends Filter {
   const FavoriteFilter();
+
+  @override
+  bool accepts(Product product) {
+    return product.isFavorite ?? false;
+  }
 }
 
 class PriceFilter extends Filter {
@@ -86,4 +108,15 @@ class PriceFilter extends Filter {
 
   final double? min;
   final double? max;
+
+  @override
+  bool accepts(Product product) {
+    final regularPrice = product.offer.regularPrice.amount;
+
+    bool result = true;
+    if (max != null && regularPrice > max!) {
+      result = false;
+    }
+    return result && regularPrice > (min ?? 0);
+  }
 }

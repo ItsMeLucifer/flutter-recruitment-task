@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:flutter_recruitment_task/repositories/products_repository.dart';
 
@@ -98,8 +99,8 @@ class Offer {
 }
 
 @JsonSerializable()
-class Tag {
-  Tag({
+class Tag extends Equatable {
+  const Tag({
     required this.tag,
     required this.label,
     required this.color,
@@ -112,6 +113,9 @@ class Tag {
   final String label;
   final String color;
   final String labelColor;
+
+  @override
+  List<Object> get props => [tag];
 }
 
 @JsonSerializable()
