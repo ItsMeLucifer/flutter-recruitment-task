@@ -203,6 +203,19 @@ class _TagWidgetState extends State<_TagWidget> {
 
   @override
   void initState() {
+    // When scrolling the list, SliverList.separated naturally disposes of items
+    // that do not display on the screen to optimize memory.
+    // I could have given SliverList a list of children and then the elements
+    // would not be dispose of, but this could affect performance for more pages.
+
+    // Two solutions come to my mind in connection with this problem:
+    //   - Store in HomeCubit, in the map, information about the color
+    //   assigned to the tag when the widget is initialized (it would
+    //   contain such information as productId, tag and assigned color)
+    //   - Make use of the `color` field available in the Tag model
+    //
+    // I decided to leave the code as it is, since the task was to fix a
+    // bug with the color change when rebuilding widgets, which was accomplished.
     color = possibleColors[Random().nextInt(possibleColors.length)];
     super.initState();
   }

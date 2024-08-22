@@ -44,8 +44,9 @@ class Product {
   /// adding entities, so that we would separate what is fetched from
   /// the server (or file) from what we are working on in the application -
   /// in this case the model could have an id field of String type, and
-  /// the entity an id field of integer type. However, I decided not to do this,
-  /// as it would affect the [ProductsRepository] file, the modification of which has been prohibited)
+  /// the entity an id field of integer type. This allows you to separate the data layer from the domain layer.
+  /// However, I decided not to do this, as it would affect the [ProductsRepository] file,
+  /// the modification of which has been prohibited)
   factory Product.fromJson(Map<String, dynamic> json) {
     json['id'] = int.parse(json['id']);
     return _$ProductFromJson(json);

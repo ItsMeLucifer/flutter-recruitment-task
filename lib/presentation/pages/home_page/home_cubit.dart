@@ -78,10 +78,6 @@ class HomeCubit extends Cubit<HomeState> {
   }) {
     emit(Loaded(pages: _pages, filters: filters));
   }
-
-  void clearProductFilters() {
-    emit(Loaded(pages: _pages, filters: []));
-  }
 }
 
 /// Filters
@@ -99,7 +95,8 @@ class TagFilter extends Filter {
 
   @override
   bool accepts(Product product) {
-    return product.tags.any((tag) => tags.contains(tag));
+    if (product.tags.isEmpty && tags.isNotEmpty) return false;
+    return tags.every((tag) => product.tags.contains(tag));
   }
 }
 
