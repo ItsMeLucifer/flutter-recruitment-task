@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_recruitment_task/models/products_page.dart';
 import 'package:flutter_recruitment_task/presentation/pages/home_page/home_cubit.dart';
 import 'package:flutter_recruitment_task/presentation/widgets/bordered_button.dart';
+import 'package:flutter_recruitment_task/presentation/widgets/price_filter_dialog.dart';
 import 'package:flutter_recruitment_task/utils/build_context2.dart';
 import 'package:flutter_recruitment_task/utils/iterable2.dart';
 
@@ -30,6 +31,7 @@ class FiltersBar extends StatelessWidget {
             const VerticalDivider(),
             _FavoriteFilterButton(state: state),
             const VerticalDivider(),
+            _PriceFilterButton(state: state),
           ],
         ),
       ),
@@ -122,10 +124,23 @@ class _FavoriteFilterButton extends StatelessWidget {
   bool get filteredByFavorite =>
       state.filters.whereType<FavoriteFilter>().isNotEmpty;
 
+  void setFilter(BuildContext context, {required bool favoriteOnly}) {
+    final List<Filter> newFilters = [...state.filters];
+
+    if (favoriteOnly) {
+      newFilters.add(const FavoriteFilter());
+    } else {
+      newFilters.remove(state.filters.whereType<FavoriteFilter>().first);
+    }
+
+    context.read<HomeCubit>().setProductFilters(filters: newFilters);
+  }
+
   @override
   Widget build(BuildContext context) {
     return BorderedButton(
       height: FiltersBar.height,
+      onTap: () => setFilter(context, favoriteOnly: !filteredByFavorite),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -133,21 +148,29 @@ class _FavoriteFilterButton extends StatelessWidget {
             value: filteredByFavorite,
             onChanged: (value) {
               if (value == null) return;
-              final List<Filter> newFilters = [...state.filters];
-
-              if (value) {
-                newFilters.add(const FavoriteFilter());
-              } else {
-                newFilters
-                    .remove(state.filters.whereType<FavoriteFilter>().first);
-              }
-
-              context.read<HomeCubit>().setProductFilters(filters: newFilters);
+              setFilter(context, favoriteOnly: value);
             },
           ),
           const Text('Favorites only'),
         ],
       ),
+    );
+  }
+}
+
+class _PriceFilterButton extends StatelessWidget {
+  final Loaded state;
+  const _PriceFilterButton({required this.state});
+
+  @override
+  Widget build(BuildContext context) {
+    return BorderedButton(
+      onTap: () => PriceFilterDialog(
+        state: state,
+        setProductFilters: context.read<HomeCubit>().setProductFilters,
+      ).show(context),
+      height: FiltersBar.height,
+      child: const Text('Filter by price'),
     );
   }
 }

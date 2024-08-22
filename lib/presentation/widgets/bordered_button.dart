@@ -4,11 +4,13 @@ class BorderedButton extends StatelessWidget {
   final double? height;
   final double? width;
   final Widget child;
+  final void Function()? onTap;
 
   const BorderedButton({
     this.height,
     this.width,
     required this.child,
+    this.onTap,
     super.key,
   });
 
@@ -16,15 +18,18 @@ class BorderedButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: height,
-      width: width,
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.black),
-        color: Colors.black12,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: height,
+        width: width,
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.black),
+          color: Colors.black12,
+        ),
+        padding: padding,
+        child: Center(child: child),
       ),
-      padding: padding,
-      child: child,
     );
   }
 }
