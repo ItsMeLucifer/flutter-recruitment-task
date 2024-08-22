@@ -20,6 +20,19 @@ class Loaded extends HomeState {
 
   final List<ProductsPage> pages;
   final List<Filter> filters;
+
+  // Getters
+
+  List<Product> get products =>
+      pages.map((page) => page.products).expand((product) => product).toList();
+
+  List<Product> get filteredProducts => products
+      .where((product) =>
+          filters.isEmpty ||
+          filters.every(
+            (filter) => filter.accepts(product),
+          ))
+      .toList();
 }
 
 class Error extends HomeState {

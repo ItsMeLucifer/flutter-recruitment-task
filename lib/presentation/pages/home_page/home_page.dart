@@ -61,26 +61,15 @@ class _LoadedWidget extends StatefulWidget {
 class _LoadedWidgetState extends State<_LoadedWidget> {
   late final ScrollController controller;
 
-  late final List<Product> products;
-
   @override
   void initState() {
     controller = ScrollController();
-    products = widget.state.pages
-        .map((page) => page.products)
-        .expand((product) => product)
-        .toList();
     // Scroll to highlighted product
     if (widget.highlightedProductId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _highlightProduct());
     }
     super.initState();
   }
-
-  List<Product> get filteredProducts => products.where((product) {
-        return widget.state.filters.isEmpty ||
-            widget.state.filters.every((filter) => filter.accepts(product));
-      }).toList();
 
   @override
   void dispose() {
@@ -98,7 +87,7 @@ class _LoadedWidgetState extends State<_LoadedWidget> {
             controller: controller,
             shrinkWrap: true,
             slivers: [
-              _ProductsSliverList(products: filteredProducts),
+              _ProductsSliverList(products: widget.state.filteredProducts),
               if (context.read<HomeCubit>().canFetchMorePages)
                 const _GetNextPageButton(),
             ],
@@ -109,13 +98,13 @@ class _LoadedWidgetState extends State<_LoadedWidget> {
   }
 
   void _highlightProduct() {
-    final product =
-        products.firstWhereOrNull((p) => p.id == widget.highlightedProductId!);
+    final product = widget.state.products
+        .firstWhereOrNull((p) => p.id == widget.highlightedProductId!);
     if (product == null) {
       context.read<HomeCubit>().getNextPage();
       return;
     }
-    final productIndex = products.indexOf(product);
+    final productIndex = widget.state.products.indexOf(product);
     final offset = _calculateOffset(productIndex);
     const Duration animationDuration = Duration(seconds: 1);
 
@@ -188,13 +177,18 @@ class _Tags extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       scrollDirection: Axis.horizontal,
-      children: product.tags.map(_TagWidget.new).toList(),
+      children: product.tags
+          .map((tag) => _TagWidget(
+                key: Key('tag_${product.id}_${tag.tag}'),
+                tag,
+              ))
+          .toList(),
     );
   }
 }
 
 class _TagWidget extends StatefulWidget {
-  const _TagWidget(this.tag);
+  const _TagWidget(this.tag, {super.key});
 
   final Tag tag;
 
