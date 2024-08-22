@@ -79,7 +79,7 @@ class _LoadedWidgetState extends State<_LoadedWidget> {
 
   List<Product> get filteredProducts => products.where((product) {
         return widget.state.filters.isEmpty ||
-            widget.state.filters.any((filter) => filter.accepts(product));
+            widget.state.filters.every((filter) => filter.accepts(product));
       }).toList();
 
   @override

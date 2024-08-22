@@ -18,15 +18,18 @@ class FiltersBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: SizedBox(
-        width: context.width(),
+    return SizedBox(
+      width: context.width(),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             _TagFilterButton(state: state),
+            const VerticalDivider(),
+            _FavoriteFilterButton(state: state),
+            const VerticalDivider(),
           ],
         ),
       ),
@@ -36,9 +39,7 @@ class FiltersBar extends StatelessWidget {
 
 class _TagFilterButton extends StatelessWidget {
   final Loaded state;
-  const _TagFilterButton({
-    required this.state,
-  });
+  const _TagFilterButton({required this.state});
 
   List<Tag> get tags {
     final products =
@@ -109,6 +110,43 @@ class _TagFilterButton extends StatelessWidget {
           }
           context.read<HomeCubit>().setProductFilters(filters: newFilters);
         },
+      ),
+    );
+  }
+}
+
+class _FavoriteFilterButton extends StatelessWidget {
+  final Loaded state;
+  const _FavoriteFilterButton({required this.state});
+
+  bool get filteredByFavorite =>
+      state.filters.whereType<FavoriteFilter>().isNotEmpty;
+
+  @override
+  Widget build(BuildContext context) {
+    return BorderedButton(
+      height: FiltersBar.height,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Checkbox.adaptive(
+            value: filteredByFavorite,
+            onChanged: (value) {
+              if (value == null) return;
+              final List<Filter> newFilters = [...state.filters];
+
+              if (value) {
+                newFilters.add(const FavoriteFilter());
+              } else {
+                newFilters
+                    .remove(state.filters.whereType<FavoriteFilter>().first);
+              }
+
+              context.read<HomeCubit>().setProductFilters(filters: newFilters);
+            },
+          ),
+          const Text('Favorites only'),
+        ],
       ),
     );
   }
