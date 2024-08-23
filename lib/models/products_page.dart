@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:flutter_recruitment_task/repositories/products_repository.dart';
 
@@ -101,12 +104,30 @@ class Offer {
 
 @JsonSerializable()
 class Tag extends Equatable {
-  const Tag({
+  Tag({
     required this.tag,
     required this.label,
     required this.color,
     required this.labelColor,
-  });
+  }) {
+    // When scrolling the list in [HomePage], SliverList.separated disposes of items
+    // that do not display on the screen to optimize memory.
+    // There are many ways to solve the problem:
+    //   - Store in HomeCubit (e.g. in the map) information about the color
+    //   assigned to the tag when the widget is initialized (it would
+    //   contain such information as productId, tag, and assigned color)
+    //   - Make use of the `color` field available in the Tag model
+    //   - Create a new field in the Tag class and assign a random color to it in the constructor
+
+    // I decided to use the last option. It seemed the simplest as well as the most optimal.
+    // Probably a better solution would have been to create a Tag entity (and, for example,
+    // rename *this* class to TagModel) that would not be immutable, so that the model
+    // would not hold data strictly related to the presentation layer, but that would
+    // have required a change in the architecture, which seems as a too radical change.
+    const possibleColors = Colors.primaries;
+    initialRandomColor =
+        possibleColors[Random().nextInt(possibleColors.length)];
+  }
 
   factory Tag.fromJson(Map<String, dynamic> json) => _$TagFromJson(json);
 
@@ -114,6 +135,8 @@ class Tag extends Equatable {
   final String label;
   final String color;
   final String labelColor;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  late final Color initialRandomColor;
 
   @override
   List<Object> get props => [tag];

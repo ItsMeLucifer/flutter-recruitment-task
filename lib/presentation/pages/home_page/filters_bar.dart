@@ -1,10 +1,11 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_recruitment_task/entities/filters.dart';
 import 'package:flutter_recruitment_task/models/products_page.dart';
 import 'package:flutter_recruitment_task/presentation/pages/home_page/home_cubit.dart';
 import 'package:flutter_recruitment_task/presentation/widgets/bordered_button.dart';
-import 'package:flutter_recruitment_task/presentation/widgets/price_filter_dialog.dart';
+import 'package:flutter_recruitment_task/presentation/pages/home_page/price_filter_dialog.dart';
 import 'package:flutter_recruitment_task/utils/build_context2.dart';
 import 'package:flutter_recruitment_task/utils/iterable2.dart';
 

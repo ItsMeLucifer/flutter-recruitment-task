@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_recruitment_task/entities/filters.dart';
 import 'package:flutter_recruitment_task/presentation/pages/home_page/home_cubit.dart';
 
 class PriceFilterDialog extends StatefulWidget {

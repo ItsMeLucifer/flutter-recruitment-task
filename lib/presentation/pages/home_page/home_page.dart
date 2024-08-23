@@ -1,18 +1,17 @@
-import 'dart:math';
-
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_recruitment_task/models/products_page.dart';
 import 'package:flutter_recruitment_task/presentation/pages/home_page/home_cubit.dart';
 import 'package:flutter_recruitment_task/presentation/widgets/big_text.dart';
-import 'package:flutter_recruitment_task/presentation/widgets/filters_bar.dart';
+import 'package:flutter_recruitment_task/presentation/pages/home_page/filters_bar.dart';
 
 const _mainPadding = EdgeInsets.all(16.0);
 
+/// A page that displays a list of products. If [highlighedProductId] is provided,
+/// the page will attempt to scroll to that product. If the product is not found
+/// on the current page, the widget will attempt to load the next page.
 class HomePage extends StatelessWidget {
-  /// The ID of the product to be scrolled, if not found on the current products
-  /// page, the widget will try to download the next page.
   final int? highlighedProductId;
 
   const HomePage({
@@ -64,7 +63,7 @@ class _LoadedWidgetState extends State<_LoadedWidget> {
   @override
   void initState() {
     controller = ScrollController();
-    // Scroll to highlighted product
+    // Scroll to the highlighted product
     if (widget.highlightedProductId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _highlightProduct());
     }
@@ -187,46 +186,18 @@ class _Tags extends StatelessWidget {
   }
 }
 
-class _TagWidget extends StatefulWidget {
+class _TagWidget extends StatelessWidget {
   const _TagWidget(this.tag, {super.key});
 
   final Tag tag;
-
-  @override
-  State<_TagWidget> createState() => _TagWidgetState();
-}
-
-class _TagWidgetState extends State<_TagWidget> {
-  List<MaterialColor> get possibleColors => Colors.primaries;
-
-  late final Color color;
-
-  @override
-  void initState() {
-    // When scrolling the list, SliverList.separated naturally disposes of items
-    // that do not display on the screen to optimize memory.
-    // I could have given SliverList a list of children and then the elements
-    // would not be dispose of, but this could affect performance for more pages.
-
-    // Two solutions come to my mind in connection with this problem:
-    //   - Store in HomeCubit, in the map, information about the color
-    //   assigned to the tag when the widget is initialized (it would
-    //   contain such information as productId, tag and assigned color)
-    //   - Make use of the `color` field available in the Tag model
-    //
-    // I decided to leave the code as it is, since the task was to fix a
-    // bug with the color change when rebuilding widgets, which was accomplished.
-    color = possibleColors[Random().nextInt(possibleColors.length)];
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Chip(
-        color: MaterialStateProperty.all(color),
-        label: Text(widget.tag.label),
+        color: MaterialStateProperty.all(tag.initialRandomColor),
+        label: Text(tag.label),
       ),
     );
   }

@@ -1,6 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_recruitment_task/entities/filters.dart';
 import 'package:flutter_recruitment_task/models/get_products_page.dart';
 import 'package:flutter_recruitment_task/models/products_page.dart';
 import 'package:flutter_recruitment_task/repositories/products_repository.dart';
@@ -26,11 +28,11 @@ class Loaded extends HomeState {
   final List<ProductsPage> pages;
   final List<Filter> filters;
 
-  // Getters
-
+  /// Returns a list of all products across all loaded [pages].
   List<Product> get products =>
       pages.map((page) => page.products).expand((product) => product).toList();
 
+  /// Returns a list of products that match the applied [filters].
   List<Product> get filteredProducts => products
       .where((product) =>
           filters.isEmpty ||
@@ -89,56 +91,5 @@ class HomeCubit extends Cubit<HomeState> {
     required List<Filter> filters,
   }) {
     emit(Loaded(pages: _pages, filters: filters));
-  }
-}
-
-/// Filters
-
-sealed class Filter {
-  const Filter();
-
-  bool accepts(Product product);
-}
-
-class TagFilter extends Filter {
-  const TagFilter({required this.tags});
-
-  final List<Tag> tags;
-
-  @override
-  bool accepts(Product product) {
-    if (product.tags.isEmpty && tags.isNotEmpty) return false;
-    return tags.every((tag) => product.tags.contains(tag));
-  }
-}
-
-class FavoriteFilter extends Filter {
-  const FavoriteFilter();
-
-  @override
-  bool accepts(Product product) {
-    return product.isFavorite ?? false;
-  }
-}
-
-class PriceFilter extends Filter {
-  const PriceFilter({
-    this.min,
-    this.max,
-  }) : assert(min != null || max != null,
-            'At least one of the values ([min] or [max]) must be provided.');
-
-  final double? min;
-  final double? max;
-
-  @override
-  bool accepts(Product product) {
-    final regularPrice = product.offer.regularPrice.amount;
-
-    bool result = true;
-    if (max != null && regularPrice > max!) {
-      result = false;
-    }
-    return result && regularPrice > (min ?? 0);
   }
 }
